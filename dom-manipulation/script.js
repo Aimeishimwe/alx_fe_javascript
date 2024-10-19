@@ -16,6 +16,35 @@ const quotes = [
     quoteDisplay.innerHTML = `<p>${selectedQuote.text}</p><small>Category: ${selectedQuote.category}</small>`;
   }
   
+  // Function to create a form for adding new quotes dynamically
+  function createAddQuoteForm() {
+    // Create input elements for the new quote text and category
+    const formContainer = document.createElement('div');
+  
+    const quoteInput = document.createElement('input');
+    quoteInput.id = 'newQuoteText';
+    quoteInput.type = 'text';
+    quoteInput.placeholder = 'Enter a new quote';
+  
+    const categoryInput = document.createElement('input');
+    categoryInput.id = 'newQuoteCategory';
+    categoryInput.type = 'text';
+    categoryInput.placeholder = 'Enter quote category';
+  
+    // Create a button to add the new quote
+    const addButton = document.createElement('button');
+    addButton.textContent = 'Add Quote';
+    addButton.onclick = addQuote; // Assign the addQuote function to handle button click
+  
+    // Append the inputs and button to the form container
+    formContainer.appendChild(quoteInput);
+    formContainer.appendChild(categoryInput);
+    formContainer.appendChild(addButton);
+  
+    // Add the form container to the body (or any specific element where you want the form to appear)
+    document.body.appendChild(formContainer);
+  }
+  
   // Function to add a new quote based on user input
   function addQuote() {
     // Get the input values for the new quote text and category
@@ -47,4 +76,7 @@ const quotes = [
   
   // Initially display a random quote when the page loads
   showRandomQuote();
+  
+  // Call the function to create the form dynamically when the page loads
+  createAddQuoteForm();
   

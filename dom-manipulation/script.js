@@ -130,46 +130,51 @@ async function postQuoteToServer(quote) {
     }
 }
 
-// Function to periodically sync data with the server
-function startQuoteSync() {
-    setInterval(async () => {
-        const serverQuotes = await fetchQuotesFromServer();
-        if (serverQuotes.length > 0) {
-            resolveConflicts(serverQuotes);
-            handleQuoteSync(serverQuotes);
-        }
-    }, 30000); // Fetch every 30 seconds
-}
-
-// Handle syncing quotes with the server
-function handleQuoteSync(serverQuotes) {
-    const updatedQuotes = serverQuotes.filter(serverQuote => {
-        return !quotes.some(localQuote => localQuote.text === serverQuote.text);
-    });
-
-    // Update local quotes and save
-    quotes.push(...updatedQuotes);
-    saveQuotes();
-
-    // Notify user of new quotes
-    if (updatedQuotes.length > 0) {
-        alert(`${updatedQuotes.length} new quote(s) added from the server!`);
+// Function to synchronize quotes with the server
+async function syncQuotes() {
+    const serverQuotes = await fetchQuotesFromServer();
+    if (serverQuotes.length > 0) {
+        handleQuoteSync(serverQuotes);
     }
 }
 
-// Resolve conflicts when syncing with the server
-function resolveConflicts(serverQuotes) {
+// Handle syncing quotes with the server and resolving conflicts
+function handleQuoteSync(serverQuotes) {
+    const updatedQuotes = [];
+    const conflictMessages = [];
+
     serverQuotes.forEach(serverQuote => {
         const localQuoteIndex = quotes.findIndex(localQuote => localQuote.text === serverQuote.text);
-        if (localQuoteIndex !== -1) {
+
+        if (localQuoteIndex === -1) {
+            // If the quote is not in local storage, add it
+            updatedQuotes.push(serverQuote);
+            conflictMessages.push(`New quote added from server: "${serverQuote.text}"`);
+        } else {
+            // If there's a conflict, ask user to resolve
             const userChoice = confirm(`Conflict detected for quote: "${serverQuote.text}".\nWould you like to keep the server version?`);
             if (userChoice) {
                 // Replace local quote with server version
                 quotes[localQuoteIndex] = serverQuote;
+                conflictMessages.push(`Quote updated from server: "${serverQuote.text}"`);
             }
         }
     });
+
+    // Update local storage with new quotes
+    quotes.push(...updatedQuotes);
     saveQuotes();
+
+    // Notify user of updates
+    if (conflictMessages.length > 0) {
+        alert(conflictMessages.join('\n'));
+    }
+}
+
+// Function to periodically sync quotes with the server
+function startQuoteSync() {
+    syncQuotes(); // Initial sync
+    setInterval(syncQuotes, 30000); // Fetch every 30 seconds
 }
 
 // Event listener to show a new random quote when the 'Show New Quote' button is clicked

@@ -22,14 +22,16 @@ function createAddQuoteForm() {
 }
 
 // Function to add a new quote based on user input
-function addQuote() {
+async function addQuote() {
     const quoteText = document.getElementById('newQuoteText').value;
     const quoteCategory = document.getElementById('newQuoteCategory').value;
 
     // Validate input fields
     if (quoteText && quoteCategory) {
-        quotes.push({ text: quoteText, category: quoteCategory });
+        const newQuote = { text: quoteText, category: quoteCategory };
+        quotes.push(newQuote);
         saveQuotes(); // Save to localStorage
+        await postQuoteToServer(newQuote); // Post to server
 
         // Clear input fields
         document.getElementById('newQuoteText').value = '';
@@ -103,6 +105,28 @@ async function fetchQuotesFromServer() {
     } catch (error) {
         console.error('Error fetching quotes from server:', error);
         return [];
+    }
+}
+
+// Function to post a new quote to the server
+async function postQuoteToServer(quote) {
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(quote)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to post quote to server');
+        }
+
+        const result = await response.json();
+        console.log('Posted quote to server:', result);
+    } catch (error) {
+        console.error('Error posting quote to server:', error);
     }
 }
 

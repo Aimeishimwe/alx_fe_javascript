@@ -10,18 +10,15 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     localStorage.setItem('quotes', JSON.stringify(quotes));
   }
   
-  // Function to display a random quote
-  function showRandomQuote() {
-    // Select a random quote from the array
-    const randomIndex = Math.floor(Math.random() * quotes.length);
-    const selectedQuote = quotes[randomIndex];
-  
-    // Find the quoteDisplay div and update its content
-    const quoteDisplay = document.getElementById('quoteDisplay');
-    quoteDisplay.innerHTML = `<p>${selectedQuote.text}</p><small>Category: ${selectedQuote.category}</small>`;
-  
-    // Store the last viewed quote in sessionStorage
-    sessionStorage.setItem('lastViewedQuote', JSON.stringify(selectedQuote));
+  // Function to create and display the form for adding new quotes
+  function createAddQuoteForm() {
+    const formContainer = document.createElement('div');
+    formContainer.innerHTML = `
+      <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+      <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+      <button onclick="addQuote()">Add Quote</button>
+    `;
+    document.body.appendChild(formContainer);
   }
   
   // Function to add a new quote based on user input
@@ -45,9 +42,21 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     }
   }
   
+  // Function to display a random quote
+  function showRandomQuote() {
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    const selectedQuote = quotes[randomIndex];
+  
+    const quoteDisplay = document.getElementById('quoteDisplay');
+    quoteDisplay.innerHTML = `<p>${selectedQuote.text}</p><small>Category: ${selectedQuote.category}</small>`;
+  
+    // Store the last viewed quote in sessionStorage
+    sessionStorage.setItem('lastViewedQuote', JSON.stringify(selectedQuote));
+  }
+  
   // Function to export quotes to a JSON file
   function exportToJsonFile() {
-    const dataStr = JSON.stringify(quotes, null, 2); // Convert quotes array to JSON string
+    const dataStr = JSON.stringify(quotes, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -64,12 +73,11 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
       try {
         const importedQuotes = JSON.parse(event.target.result);
   
-        // Validate that imported data is an array of quotes
         if (Array.isArray(importedQuotes) && importedQuotes.every(quote => quote.text && quote.category)) {
-          quotes.push(...importedQuotes); // Add imported quotes to existing array
-          saveQuotes(); // Save updated quotes to localStorage
+          quotes.push(...importedQuotes);
+          saveQuotes();
           alert('Quotes imported successfully!');
-          showRandomQuote(); // Display a random quote from the updated list
+          showRandomQuote();
         } else {
           alert('Invalid JSON format. Please upload a valid quotes JSON file.');
         }
@@ -92,4 +100,7 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
   } else {
     showRandomQuote();
   }
+  
+  // Call the function to create the add quote form when the page loads
+  createAddQuoteForm();
   
